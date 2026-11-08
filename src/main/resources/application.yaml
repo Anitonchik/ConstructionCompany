@@ -1,3 +1,12 @@
 spring:
   application:
     name: constructioncompany
+
+  config:
+    import: optional:application-local.yaml
+
+  liquibase:
+    enabled: true
+    drop-first: false
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    default-schema: public

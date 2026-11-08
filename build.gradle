@@ -2,7 +2,11 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '4.1.1'
 	id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.diffplug.spotless' version '6.25.0'
+    id 'jacoco'
+    id 'org.sonarqube' version '4.4.1.3373'
 }
+
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
@@ -15,6 +19,19 @@ java {
 
 repositories {
 	mavenCentral()
+}
+
+spotless {
+    java {
+        target fileTree('.') {
+            include '**/*.java'
+            exclude '**/build/**', '**/build-*/**'
+        }
+        googleJavaFormat()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
 }
 
 dependencies {
