@@ -156,7 +156,7 @@
               echo "- **Всего последних запусков**: $TOTAL_RUNS" >> $GITHUB_STEP_SUMMARY
               echo "- **Успешных**: $SUCCESS_RUNS" >> $GITHUB_STEP_SUMMARY
               echo "- **Упавших с ошибкой**: $FAILED_RUNS" >> $GITHUB_STEP_SUMMARY
-              echo "- ⚠**Отмененных/Пропущенных**: $OTHER_RUNS" >> $GITHUB_STEP_SUMMARY
+              echo "- **Отмененных/Пропущенных**: $OTHER_RUNS" >> $GITHUB_STEP_SUMMARY
               echo "- **Доля успешных запусков**: **${SUCCESS_RATE}%**" >> $GITHUB_STEP_SUMMARY
 
               echo "metric_name=ci_stability_rate" > ci-metrics.txt
