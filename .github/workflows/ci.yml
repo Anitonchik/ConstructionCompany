@@ -137,10 +137,13 @@
             env:
               GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             run: |
-              RUNS_DATA=$(gh api repos/${{ github.repository }}/actions/workflows/$WORKFLOW_ID/runs?per_page=20)
+              # Обращаемся к workflow напрямую по имени файла ci.yml
+              RUNS_DATA=$(gh api repos/${{ github.repository }}/actions/workflows/ci.yml/runs?per_page=20)
 
               TOTAL_RUNS=$(echo "$RUNS_DATA" | jq '.workflow_runs | length')
               SUCCESS_RUNS=$(echo "$RUNS_DATA" | jq '[.workflow_runs[] | select(.conclusion == "success")] | length')
+              FAILED_RUNS=$(echo "$RUNS_DATA" | jq '[.workflow_runs[] | select(.conclusion == "failure")] | length')
+              OTHER_RUNS=$(echo "$RUNS_DATA" | jq '[.workflow_runs[] | select(.conclusion != "success" and .conclusion != "failure")] | length')
 
               if [ "$TOTAL_RUNS" -gt 0 ]; then
                 SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($SUCCESS_RUNS / $TOTAL_RUNS) * 100}")
@@ -149,14 +152,20 @@
               fi
 
               echo "### Метрика стабильности CI" >> $GITHUB_STEP_SUMMARY
+              echo "- **Workflow**: \`ci.yml\`" >> $GITHUB_STEP_SUMMARY
               echo "- **Всего последних запусков**: $TOTAL_RUNS" >> $GITHUB_STEP_SUMMARY
-              echo "- **Успешных запусков**: $SUCCESS_RUNS" >> $GITHUB_STEP_SUMMARY
+              echo "- **Успешных**: $SUCCESS_RUNS" >> $GITHUB_STEP_SUMMARY
+              echo "- **Упавших с ошибкой**: $FAILED_RUNS" >> $GITHUB_STEP_SUMMARY
+              echo "- ⚠**Отмененных/Пропущенных**: $OTHER_RUNS" >> $GITHUB_STEP_SUMMARY
               echo "- **Доля успешных запусков**: **${SUCCESS_RATE}%**" >> $GITHUB_STEP_SUMMARY
 
               echo "metric_name=ci_stability_rate" > ci-metrics.txt
+              echo "workflow=ci.yml" >> ci-metrics.txt
               echo "success_rate_percent=${SUCCESS_RATE}" >> ci-metrics.txt
               echo "total_runs=${TOTAL_RUNS}" >> ci-metrics.txt
               echo "success_runs=${SUCCESS_RUNS}" >> ci-metrics.txt
+              echo "failed_runs=${FAILED_RUNS}" >> ci-metrics.txt
+              echo "other_runs=${OTHER_RUNS}" >> ci-metrics.txt
               echo "branch=${{ github.ref_name }}" >> ci-metrics.txt
 
           - name: Upload CI Metrics Artifact
