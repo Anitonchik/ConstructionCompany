@@ -127,24 +127,40 @@
             tags: ghcr.io/${{ steps.repo.outputs.name }}:latest
 
     pipline-metrics:
-      runs-on: ubuntu-latest
-      if: always()
-      needs: [ lint, test, build ]
-      permissions:
-        actions: read
-      steps:
-        - name: CI success rate (last 20 runs)
-          env:
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          run: |
-            success=$(gh run list \
-              --workflow="Java CI with Gradle" \
-              --limit 20 \
-              --json conclusion \
-              --jq '[.[] | select(.conclusion == "success")] | length')
+        name: Calculate CI Stability Metric
+        runs-on: ubuntu-latest
+        if: always()
+        needs: [ deploy ]
 
-            total=20
-            rate=$(( success * 100 / total ))
+        steps:
+          - name: Calculate Pipeline Success Rate
+            env:
+              GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            run: |
+              RUNS_DATA=$(gh api repos/${{ github.repository }}/actions/runs?per_page=20)
 
-            echo "## CI Success Rate" >> $GITHUB_STEP_SUMMARY
-            echo "**${rate}%** (${success}/${total} successful runs)" >> $GITHUB_STEP_SUMMARY
+              TOTAL_RUNS=$(echo "$RUNS_DATA" | jq '.workflow_runs | length')
+              SUCCESS_RUNS=$(echo "$RUNS_DATA" | jq '[.workflow_runs[] | select(.conclusion == "success")] | length')
+
+              if [ "$TOTAL_RUNS" -gt 0 ]; then
+                SUCCESS_RATE=$(awk "BEGIN {printf \"%.2f\", ($SUCCESS_RUNS / $TOTAL_RUNS) * 100}")
+              else
+                SUCCESS_RATE="0.00"
+              fi
+
+              echo "### Метрика стабильности CI" >> $GITHUB_STEP_SUMMARY
+              echo "- **Всего последних запусков**: $TOTAL_RUNS" >> $GITHUB_STEP_SUMMARY
+              echo "- **Успешных запусков**: $SUCCESS_RUNS" >> $GITHUB_STEP_SUMMARY
+              echo "- **Доля успешных запусков**: **${SUCCESS_RATE}%**" >> $GITHUB_STEP_SUMMARY
+
+              echo "metric_name=ci_stability_rate" > ci-metrics.txt
+              echo "success_rate_percent=${SUCCESS_RATE}" >> ci-metrics.txt
+              echo "total_runs=${TOTAL_RUNS}" >> ci-metrics.txt
+              echo "success_runs=${SUCCESS_RUNS}" >> ci-metrics.txt
+              echo "branch=${{ github.ref_name }}" >> ci-metrics.txt
+
+          - name: Upload CI Metrics Artifact
+            uses: actions/upload-artifact@v4
+            with:
+              name: ci-stability-metrics-report
+              path: ci-metrics.txt

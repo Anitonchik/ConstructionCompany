@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write # Необходимо для создания релиза в GitHub
+      contents: write
 
     steps:
       - name: Checkout code
@@ -32,6 +32,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: build/libs/*.jar # Путь к вашему собранному jar-файлу
+          files: build/libs/*-SNAPSHOT.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
