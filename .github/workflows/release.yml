@@ -1,0 +1,37 @@
+name: Build and Release Spring Boot App
+
+on:
+  push:
+    tags:
+      - 'v*' # Срабатывает при пуше тегов
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # Необходимо для создания релиза в GitHub
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21 (укажите вашу версию Java)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew bootJar
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/libs/*.jar # Путь к вашему собранному jar-файлу
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
