@@ -5,8 +5,9 @@ plugins {
     id 'com.diffplug.spotless' version '6.25.0'
     id 'jacoco'
     id 'pl.allegro.tech.build.axion-release' version '1.20.1'
+    id 'checkstyle'
+    id 'com.github.spotbugs' version '6.0.9'
 }
-
 
 group = 'com.example'
 version = scmVersion.version
