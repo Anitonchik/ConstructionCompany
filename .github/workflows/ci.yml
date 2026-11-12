@@ -137,7 +137,7 @@
             env:
               GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             run: |
-              RUNS_DATA=$(gh api repos/${{ github.repository }}/actions/runs?per_page=20)
+              RUNS_DATA=$(gh api repos/${{ github.repository }}/actions/workflows/$WORKFLOW_ID/runs?per_page=20)
 
               TOTAL_RUNS=$(echo "$RUNS_DATA" | jq '.workflow_runs | length')
               SUCCESS_RUNS=$(echo "$RUNS_DATA" | jq '[.workflow_runs[] | select(.conclusion == "success")] | length')
