@@ -10,3 +10,6 @@ spring:
     drop-first: false
     change-log: classpath:db/changelog/db.changelog-master.yaml
     default-schema: public
+
+  server:
+    port: 8081
