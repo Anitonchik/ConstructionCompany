@@ -20,9 +20,10 @@
         - name: Setup Gradle
           uses: gradle/actions/setup-gradle@v4
         # spotlessCheck
-        - name: Run Spotless Check (Code Style)
+        - name: Check code formatting with Spotless
           run: ./gradlew spotlessCheck
-
+        - name: Build and run tests
+          run: ./gradlew build -x spotlessCheck
         - name: Run Checkstyle
           run: ./gradlew checkstyleMain checkstyleTest
         - name: Run SpotBugs
@@ -137,7 +138,6 @@
             env:
               GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             run: |
-              # Обращаемся к workflow напрямую по имени файла ci.yml
               RUNS_DATA=$(gh api repos/${{ github.repository }}/actions/workflows/ci.yml/runs?per_page=20)
 
               TOTAL_RUNS=$(echo "$RUNS_DATA" | jq '.workflow_runs | length')

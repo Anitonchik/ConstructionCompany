@@ -1,3 +1,5 @@
+import com.github.spotbugs.snom.SpotBugsTask
+
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '4.1.1'
@@ -32,6 +34,27 @@ spotless {
         removeUnusedImports()
         trimTrailingWhitespace()
         endWithNewline()
+    }
+}
+
+checkstyle {
+    toolVersion = '10.12.5'
+    configFile = file('config/checkstyle/checkstyle.xml')
+    ignoreFailures = false
+    maxWarnings = 0
+}
+
+spotbugs {
+    toolVersion = '4.8.3'
+    effort = 'max'
+    reportLevel = 'high'
+    ignoreFailures = false
+}
+
+tasks.withType(SpotBugsTask).configureEach {
+    reports {
+        html.required = true
+        xml.required = false
     }
 }
 
