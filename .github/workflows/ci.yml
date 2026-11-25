@@ -19,13 +19,15 @@
             distribution: 'temurin'
         - name: Setup Gradle
           uses: gradle/actions/setup-gradle@v4
-        # spotlessCheck
+
         - name: Check code formatting with Spotless
           run: ./gradlew spotlessCheck
         - name: Build and run tests
           run: ./gradlew build -x spotlessCheck
+
         - name: Run Checkstyle
           run: ./gradlew checkstyleMain checkstyleTest
+
         - name: Run SpotBugs
           run: ./gradlew spotbugsMain
         - name: Upload static analysis
